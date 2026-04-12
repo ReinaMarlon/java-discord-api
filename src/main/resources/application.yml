@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: java-discord-api
+
+  profiles:
+    active: prod
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+logging:
+  level:
+    org.springframework.web: ERROR
+
+server:
+  port: ${PORT:8181}
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:postgresql://${RAILWAY_TCP_PROXY_DOMAIN}:${RAILWAY_TCP_PROXY_PORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:postgresql://${TESTING_RAILWAY_TCP_PROXY_DOMAIN}:${TESTING_RAILWAY_TCP_PROXY_PORT}/${TESTING_PGDATABASE}
+    username: ${TESTING_PGUSER}
+    password: ${TESTING_PGPASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
