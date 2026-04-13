@@ -73,7 +73,6 @@ tasks.withType(Checkstyle).configureEach {
     reports {
         xml.required = true
         html.required = true
-        html.outputLocation = file("/reports/checkstyle/checkstyle.html")
     }
 }
 
