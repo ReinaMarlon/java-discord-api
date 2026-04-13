@@ -1,0 +1,33 @@
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  discord:
+    client-id: 12345
+    client-secret: 12569784gvds252141546y8
+    redirect-uri: http://localhost8080/api/v1/auth/callback
+
+  jwt_secret: 31224912469dsjhahdfks193y12
+
+logging:
+  level:
+    org.springframework.web: ERROR
+
+datasource:
+  hikari:
+    connection-timeout: 30000
+    maximum-pool-size: 10
+
+server:
+  port: ${PORT:8080}
