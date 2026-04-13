@@ -13,11 +13,27 @@ public class DiscordTokenResponse {
     @JsonProperty("expires_in")
     private int expiresIn;
 
-    public String getAccessToken() { return accessToken; }
-    public String getTokenType() { return tokenType; }
-    public int getExpiresIn() { return expiresIn; }
+    public String getAccessToken() {
+        return accessToken;
+    }
 
-    public void setAccessToken(String accessToken) { this.accessToken = accessToken; }
-    public void setTokenType(String tokenType) { this.tokenType = tokenType; }
-    public void setExpiresIn(int expiresIn) { this.expiresIn = expiresIn; }
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public int getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
+    public void setExpiresIn(int expiresIn) {
+        this.expiresIn = expiresIn;
+    }
 }

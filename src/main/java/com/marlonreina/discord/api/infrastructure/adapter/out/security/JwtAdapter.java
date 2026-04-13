@@ -2,7 +2,9 @@ package com.marlonreina.discord.api.infrastructure.adapter.out.security;
 
 import com.marlonreina.discord.api.domain.model.User;
 import com.marlonreina.discord.api.domain.port.out.JwtPort;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +14,7 @@ import java.util.Date;
 public class JwtAdapter implements JwtPort {
 
     @Value("${spring.jwt_secret}")
-    private String SECRET;
+    private String secret;
 
     @Override
     public String generateToken(User user) {
@@ -21,14 +23,14 @@ public class JwtAdapter implements JwtPort {
                 .claim("username", user.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
-                .signWith(SignatureAlgorithm.HS256, SECRET)
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 
     @Override
     public String extractUserId(String token) {
         return Jwts.parser()
-                .setSigningKey(SECRET)
+                .setSigningKey(secret)
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();

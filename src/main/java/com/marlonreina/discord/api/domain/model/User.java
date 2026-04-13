@@ -12,7 +12,15 @@ public class User {
         this.avatar = avatar;
     }
 
-    public String getId() { return id; }
-    public String getUsername() { return username; }
-    public String getAvatar() { return avatar; }
+    public String getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
 }

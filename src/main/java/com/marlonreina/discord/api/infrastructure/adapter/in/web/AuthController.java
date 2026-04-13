@@ -4,8 +4,10 @@ import com.marlonreina.discord.api.domain.port.in.AuthUseCase;
 import com.marlonreina.discord.api.shared.dto.AuthResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -29,11 +31,13 @@ public class AuthController {
 
     @GetMapping("/login")
     public void login(HttpServletResponse response) throws IOException {
-        String url = "https://discord.com/api/oauth2/authorize" +
-                "?client_id=" + clientId +
-                "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) +
-                "&response_type=code" +
-                "&scope=identify%20email";
+        String url = "https://discord.com/api/oauth2/authorize"
+                + "?client_id="
+                + clientId
+                + "&redirect_uri="
+                + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
+                + "&response_type=code"
+                + "&scope=identify%20email";
 
         response.sendRedirect(url);
     }

@@ -12,6 +12,11 @@ public class AuthResponse {
         this.user = user;
     }
 
-    public String getToken() { return token; }
-    public User getUser() { return user; }
+    public String getToken() {
+        return token;
+    }
+
+    public User getUser() {
+        return user;
+    }
 }
