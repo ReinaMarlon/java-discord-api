@@ -25,19 +25,24 @@ public class AuthController {
     @Value("${spring.discord.client-id}")
     private String clientId;
 
+    private static final String discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
+
+    private static final String scope = "identify%20email%20guilds";
+
     public AuthController(AuthUseCase authUseCase) {
         this.authUseCase = authUseCase;
     }
 
     @GetMapping("/login")
     public void login(HttpServletResponse response) throws IOException {
-        String url = "https://discord.com/api/oauth2/authorize"
+        String url = discordAuthorizeUrl
                 + "?client_id="
                 + clientId
                 + "&redirect_uri="
                 + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
                 + "&response_type=code"
-                + "&scope=identify%20email";
+                + "&scope="
+                + scope;
 
         response.sendRedirect(url);
     }
