@@ -12,8 +12,13 @@ logging:
   level:
     org.springframework.web: ERROR
 
+datasource:
+  hikari:
+    connection-timeout: 30000
+    maximum-pool-size: 10
+
 server:
-  port: ${PORT:8181}
+  port: ${PORT:8080}
 
 ---
 
@@ -33,6 +38,12 @@ spring:
       ddl-auto: update
     show-sql: false
 
+  discord:
+    client-id: ${DISCORD_CLIENT_ID}
+    client-secret: ${DISCORD_CLIENT_SECRET}
+    redirect-uri: ${DISCORD_REDIRECT_URL}
+
+  jwt_secret: ${JWT_SECRET}
 ---
 
 spring:
@@ -50,3 +61,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+  discord:
+    client-id: ${DISCORD_CLIENT_ID}
+    client-secret: ${DISCORD_CLIENT_SECRET}
+    redirect-uri: ${TESTING_DISCORD_REDIRECT_URL}
+
+  jwt_secret: ${JWT_SECRET}
