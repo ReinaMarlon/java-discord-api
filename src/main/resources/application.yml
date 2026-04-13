@@ -44,6 +44,21 @@ spring:
     redirect-uri: ${DISCORD_REDIRECT_URL}
 
   jwt_secret: ${JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+  endpoint:
+    health:
+      show-details: never
+
+  info:
+    env:
+      enabled: false
+      
 ---
 
 spring:
@@ -68,3 +83,17 @@ spring:
     redirect-uri: ${TESTING_DISCORD_REDIRECT_URL}
 
   jwt_secret: ${JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+  endpoint:
+    health:
+      show-details: always
+
+  info:
+    env:
+      enabled: true
