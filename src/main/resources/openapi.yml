@@ -1,0 +1,202 @@
+openapi: 3.0.3
+info:
+  title: Hexa API
+  description: API para gestión de servidores y configuraciones del bot
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+  - url: https://java-discord-api-production.up.railway.app/api/v1
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Guilds
+  - name: Features
+
+paths:
+
+  /auth/login:
+    get:
+      tags: [Auth]
+      summary: Redirige a login con Discord
+      responses:
+        '302':
+          description: Redirección a Discord OAuth
+
+  /auth/callback:
+    get:
+      tags: [Auth]
+      summary: Callback de Discord OAuth
+      responses:
+        '200':
+          description: Usuario autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Obtener información del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Usuario actual
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /guilds:
+    get:
+      tags: [Guilds]
+      summary: Obtener servidores del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de servidores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Guild'
+
+  /guilds/{guildId}:
+    get:
+      tags: [Guilds]
+      summary: Obtener configuración de un servidor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Configuración del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuildConfig'
+
+  /guilds/{guildId}/features:
+    get:
+      tags: [Features]
+      summary: Obtener features del servidor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Features del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuildFeatures'
+
+    put:
+      tags: [Features]
+      summary: Actualizar features del servidor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuildFeaturesUpdate'
+      responses:
+        '200':
+          description: Features actualizadas
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        avatar:
+          type: string
+
+    Guild:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        isAdmin:
+          type: boolean
+
+    GuildConfig:
+      type: object
+      properties:
+        guildId:
+          type: string
+        prefix:
+          type: string
+
+    GuildFeatures:
+      type: object
+      properties:
+        premium:
+          type: boolean
+        welcome_enabled:
+          type: boolean
+        advanced_logs:
+          type: boolean
+        economy_enabled:
+          type: boolean
+        custom_commands:
+          type: boolean
+
+    GuildFeaturesUpdate:
+      type: object
+      properties:
+        welcome_enabled:
+          type: boolean
+        advanced_logs:
+          type: boolean
+        economy_enabled:
+          type: boolean
+        custom_commands:
+          type: boolean
