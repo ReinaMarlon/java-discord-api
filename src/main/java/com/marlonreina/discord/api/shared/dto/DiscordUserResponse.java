@@ -7,6 +7,7 @@ public class DiscordUserResponse {
     private String id;
     private String username;
     private String avatar;
+    private String email;
 
     @JsonProperty("global_name")
     private String globalName;
@@ -23,6 +24,10 @@ public class DiscordUserResponse {
         return avatar;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public String getGlobalName() {
         return globalName;
     }
@@ -37,6 +42,10 @@ public class DiscordUserResponse {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setGlobalName(String globalName) {

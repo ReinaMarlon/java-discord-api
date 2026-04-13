@@ -56,8 +56,8 @@ public class DiscordOauthAdapter implements DiscordOauthPort {
                         DiscordTokenResponse.class
                 );
 
-        if (response.getBody() == null) {
-            throw new RuntimeException("Error obteniendo access token de Discord");
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new IllegalStateException("Failed to retrieve access token from Discord");
         }
 
         return response.getBody().getAccessToken();
@@ -90,7 +90,8 @@ public class DiscordOauthAdapter implements DiscordOauthPort {
         return new User(
                 discordUser.getId(),
                 discordUser.getUsername(),
-                discordUser.getAvatar()
+                discordUser.getAvatar(),
+                discordUser.getEmail()
         );
     }
 }
