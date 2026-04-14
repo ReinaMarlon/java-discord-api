@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -32,35 +33,35 @@ public class DiscordOauthAdapter implements DiscordOauthPort {
 
     @Override
     public String getAccessToken(String code) {
+        try {
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("client_id", clientId);
-        body.add("client_secret", clientSecret);
-        body.add("grant_type", "authorization_code");
-        body.add("code", code);
-        body.add("redirect_uri", redirectUri);
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("client_id", clientId);
+            body.add("client_secret", clientSecret);
+            body.add("grant_type", "authorization_code");
+            body.add("code", code);
+            body.add("redirect_uri", redirectUri);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        HttpEntity<MultiValueMap<String, String>> request =
-                new HttpEntity<>(body, headers);
+            HttpEntity<MultiValueMap<String, String>> request =
+                    new HttpEntity<>(body, headers);
 
-        String url = "https://discord.com/api/oauth2/token";
+            String url = "https://discord.com/api/oauth2/token";
 
-        ResponseEntity<DiscordTokenResponse> response =
-                restTemplate.exchange(
-                        url,
-                        HttpMethod.POST,
-                        request,
-                        DiscordTokenResponse.class
-                );
+            ResponseEntity<DiscordTokenResponse> response =
+                    restTemplate.exchange(url, HttpMethod.POST, request, DiscordTokenResponse.class);
 
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new IllegalStateException("Failed to retrieve access token from Discord");
+            return response.getBody().getAccessToken();
+
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode().value() == 400) {
+                throw new RuntimeException("OAUTH_CODE_INVALID");
+            }
+
+            throw new RuntimeException("DISCORD_OAUTH_ERROR");
         }
-
-        return response.getBody().getAccessToken();
     }
 
     @Override
