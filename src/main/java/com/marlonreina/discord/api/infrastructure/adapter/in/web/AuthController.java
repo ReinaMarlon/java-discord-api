@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -27,7 +28,7 @@ public class AuthController {
 
     private static final String discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
 
-    private static final String scope = "identify%20email%20guilds";
+    private static final String scope = "identify";
 
     public AuthController(AuthUseCase authUseCase) {
         this.authUseCase = authUseCase;
@@ -48,7 +49,29 @@ public class AuthController {
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<AuthResponse> callback(@RequestParam String code) {
-        return ResponseEntity.ok(authUseCase.authenticate(code));
+    public ResponseEntity<?> callback(@RequestParam String code) {
+
+        try {
+            String token = authUseCase.authenticate(code);
+            return ResponseEntity.ok(new AuthResponse(token));
+
+        } catch (RuntimeException e) {
+
+            if (e.getMessage().equals("OAUTH_CODE_INVALID")) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(Map.of(
+                                "error", "OAUTH_CODE_INVALID",
+                                "message", "El login expiró o ya fue usado. Intenta de nuevo."
+                        ));
+            }
+
+            return ResponseEntity
+                    .status(500)
+                    .body(Map.of(
+                            "error", "INTERNAL_ERROR",
+                            "message", "Error en autenticación"
+                    ));
+        }
     }
 }

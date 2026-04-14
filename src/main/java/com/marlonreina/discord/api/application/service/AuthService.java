@@ -19,11 +19,9 @@ public class AuthService implements AuthUseCase {
     }
 
     @Override
-    public AuthResponse authenticate(String code) {
+    public String authenticate(String code) {
         String accessToken = discordOauthPort.getAccessToken(code);
         User user = discordOauthPort.getUser(accessToken);
-        String token = jwtPort.generateToken(user);
-
-        return new AuthResponse(token, user);
+        return jwtPort.generateToken(user);
     }
 }

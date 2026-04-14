@@ -22,7 +22,6 @@ public class JwtAdapter implements JwtPort {
         return Jwts.builder()
                 .setSubject(user.getId())
                 .claim("username", user.getUsername())
-                .claim("email", user.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(SignatureAlgorithm.HS256, secret)
