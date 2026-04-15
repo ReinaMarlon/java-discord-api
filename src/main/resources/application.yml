@@ -20,6 +20,10 @@ datasource:
 server:
   port: ${PORT:8080}
 
+discord:
+  oauth:
+    scopes: ${OAUTH_SCOPES}
+
 ---
 
 spring:

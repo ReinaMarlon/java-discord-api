@@ -14,11 +14,15 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
 
   discord:
-    client-id: 12345
+    client-id: 57363473
     client-secret: 12569784gvds252141546y8
     redirect-uri: http://localhost8080/api/v1/auth/callback
 
   jwt_secret: 31224912469dsjhahdfks193y12
+
+discord:
+  oauth:
+    scopes: identify
 
 logging:
   level:

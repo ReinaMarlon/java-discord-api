@@ -62,6 +62,7 @@ public class DiscordOauthAdapter implements DiscordOauthPort {
 
             throw new RuntimeException("DISCORD_OAUTH_ERROR");
         }
+
     }
 
     @Override

@@ -68,7 +68,7 @@ jacocoTestReport {
 
 checkstyle {
     toolVersion = '10.12.4'
-    configFile = file("config/checkstyle/checkstyle-severity-google-DO-NOT-USE.xml")
+    configFile = file("config/checkstyle/checkstyle.xml")
 }
 
 tasks.withType(Checkstyle).configureEach {
