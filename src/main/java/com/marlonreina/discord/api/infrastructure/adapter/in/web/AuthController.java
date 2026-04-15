@@ -28,7 +28,8 @@ public class AuthController {
 
     private static final String discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
 
-    private static final String scope = "identify";
+    @Value("${discord.oauth.scopes}")
+    private String scope;
 
     public AuthController(AuthUseCase authUseCase) {
         this.authUseCase = authUseCase;
@@ -36,6 +37,7 @@ public class AuthController {
 
     @GetMapping("/login")
     public void login(HttpServletResponse response) throws IOException {
+        String encodedScope = URLEncoder.encode(scope, StandardCharsets.UTF_8);
         String url = discordAuthorizeUrl
                 + "?client_id="
                 + clientId
@@ -43,7 +45,7 @@ public class AuthController {
                 + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
                 + "&response_type=code"
                 + "&scope="
-                + scope;
+                + encodedScope;
 
         response.sendRedirect(url);
     }
