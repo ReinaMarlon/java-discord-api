@@ -4,6 +4,7 @@ import com.marlonreina.discord.api.domain.model.User;
 import com.marlonreina.discord.api.domain.port.out.JwtPort;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,7 @@ import java.util.Date;
 @Component
 public class JwtAdapter implements JwtPort {
 
-    @Value("${spring.jwt_secret}")
+    @Value("${spring.jwt-secret}")
     private String secret;
 
     private static final long EXPIRATION_TIME = 86400000L;

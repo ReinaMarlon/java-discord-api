@@ -10,7 +10,10 @@ spring:
 
 logging:
   level:
-    org.springframework.web: ERROR
+    root: INFO
+    org.springframework.web: DEBUG
+    com.marlonreina.discord.api: DEBUG
+
 
 datasource:
   hikari:
@@ -47,7 +50,7 @@ spring:
     client-secret: ${DISCORD_CLIENT_SECRET}
     redirect-uri: ${DISCORD_REDIRECT_URL}
 
-  jwt_secret: ${JWT_SECRET}
+  jwt-secret: ${JWT_SECRET}
 
 management:
   endpoints:
@@ -86,7 +89,7 @@ spring:
     client-secret: ${DISCORD_CLIENT_SECRET}
     redirect-uri: ${TESTING_DISCORD_REDIRECT_URL}
 
-  jwt_secret: ${JWT_SECRET}
+  jwt-secret: ${JWT_SECRET}
 
 management:
   endpoints:
