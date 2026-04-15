@@ -58,7 +58,7 @@ public class AuthController {
             return ResponseEntity.ok(new AuthResponse(token));
 
         } catch (RuntimeException e) {
-
+            e.printStackTrace();
             if (e.getMessage().equals("OAUTH_CODE_INVALID")) {
                 return ResponseEntity
                         .badRequest()
@@ -72,7 +72,7 @@ public class AuthController {
                     .status(500)
                     .body(Map.of(
                             "error", "INTERNAL_ERROR",
-                            "message", "Error en autenticación"
+                            "message", e.getMessage()
                     ));
         }
     }

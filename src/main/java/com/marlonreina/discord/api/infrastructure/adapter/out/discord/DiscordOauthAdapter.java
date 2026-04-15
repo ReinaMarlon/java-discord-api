@@ -32,7 +32,7 @@ public class DiscordOauthAdapter implements DiscordOauthPort {
     private String redirectUri;
 
     @Override
-    public String getAccessToken(String code) {
+    public DiscordTokenResponse getToken(String code) {
         try {
 
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
@@ -48,21 +48,30 @@ public class DiscordOauthAdapter implements DiscordOauthPort {
             HttpEntity<MultiValueMap<String, String>> request =
                     new HttpEntity<>(body, headers);
 
-            String url = "https://discord.com/api/oauth2/token";
-
             ResponseEntity<DiscordTokenResponse> response =
-                    restTemplate.exchange(url, HttpMethod.POST, request, DiscordTokenResponse.class);
+                    restTemplate.exchange(
+                            "https://discord.com/api/oauth2/token",
+                            HttpMethod.POST,
+                            request,
+                            DiscordTokenResponse.class
+                    );
 
-            return response.getBody().getAccessToken();
+            DiscordTokenResponse token = response.getBody();
+
+            if (token == null) {
+                throw new RuntimeException("DISCORD_TOKEN_NULL");
+            }
+
+            return token;
 
         } catch (HttpClientErrorException e) {
+
             if (e.getStatusCode().value() == 400) {
                 throw new RuntimeException("OAUTH_CODE_INVALID");
             }
 
             throw new RuntimeException("DISCORD_OAUTH_ERROR");
         }
-
     }
 
     @Override
@@ -84,10 +93,7 @@ public class DiscordOauthAdapter implements DiscordOauthPort {
                 );
 
         DiscordUserResponse discordUser = response.getBody();
-
-        if (discordUser == null) {
-            throw new RuntimeException("Error obteniendo usuario de Discord");
-        }
+        // System.out.println("DISCORD ID: " + discordUser.getId());
 
         return new User(
                 discordUser.getId(),

@@ -2,7 +2,10 @@ package com.marlonreina.discord.api.infrastructure.adapter.out.discord;
 
 import com.marlonreina.discord.api.domain.model.DiscordGuild;
 import com.marlonreina.discord.api.domain.model.DiscordUser;
+import com.marlonreina.discord.api.domain.model.User;
 import com.marlonreina.discord.api.domain.port.out.DiscordPort;
+import com.marlonreina.discord.api.domain.port.out.UserRepositoryPort;
+import com.marlonreina.discord.api.infrastructure.adapter.out.security.DiscordTokenService;
 import com.marlonreina.discord.api.infrastructure.adapter.out.security.DiscordTokenStore;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,17 +20,20 @@ import java.util.Map;
 @Component
 public class DiscordAdapter implements DiscordPort {
 
-    private final DiscordTokenStore tokenStore;
+    // private final DiscordTokenStore tokenStore;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final UserRepositoryPort userRepository;
+    private final DiscordTokenService tokenService;
 
-    public DiscordAdapter(DiscordTokenStore tokenStore) {
-        this.tokenStore = tokenStore;
+    public DiscordAdapter(DiscordTokenService tokenService, UserRepositoryPort userRepository) {
+        this.tokenService = tokenService;
+        this.userRepository = userRepository;
     }
 
     @Override
     public DiscordUser getUser(String discordId) {
 
-        String token = tokenStore.get(discordId);
+        String token = tokenService.getValidAccessToken(discordId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
@@ -53,7 +59,9 @@ public class DiscordAdapter implements DiscordPort {
     @Override
     public List<DiscordGuild> getUserGuilds(String discordId) {
 
-        String token = tokenStore.get(discordId);
+        // String token = getAccessToken(discordId);
+
+        String token = tokenService.getValidAccessToken(discordId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);

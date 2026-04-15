@@ -36,13 +36,20 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 String userId = jwtPort.extractUserId(token);
 
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(userId, null, List.of());
+                if (userId != null) {
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(
+                                    userId,
+                                    null,
+                                    List.of()
+                            );
 
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
 
             } catch (Exception e) {
-                System.out.println("exception");
+                e.printStackTrace();
+                SecurityContextHolder.clearContext();
             }
         }
 
