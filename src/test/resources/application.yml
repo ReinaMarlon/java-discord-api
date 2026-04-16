@@ -8,6 +8,10 @@ spring:
     username: sa
     password:
 
+  frontend:
+    set-secure: false
+    redirect-url: http://localhost8080/api/v1/auth/callback
+
   jpa:
     hibernate:
       ddl-auto: create-drop

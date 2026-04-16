@@ -28,6 +28,12 @@ public class AuthController {
 
     private static final String discordAuthorizeUrl = "https://discord.com/api/oauth2/authorize";
 
+    @Value("${spring.frontend.redirect-url}")
+    private String frontendRedirectUrl;
+
+    @Value("${spring.frontend.set-secure}")
+    private Boolean frontendSetSecure;
+
     @Value("${discord.oauth.scopes}")
     private String scope;
 
@@ -51,29 +57,36 @@ public class AuthController {
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<?> callback(@RequestParam String code) {
+    public void callback(@RequestParam String code, HttpServletResponse response) throws IOException {
 
         try {
             String token = authUseCase.authenticate(code);
-            return ResponseEntity.ok(new AuthResponse(token));
+
+            jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("jwt", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(frontendSetSecure);
+            cookie.setPath("/");
+            cookie.setMaxAge(86400);
+
+            response.addCookie(cookie);
+
+            String redirectUrl = frontendRedirectUrl + token;
+            response.sendRedirect(redirectUrl);
 
         } catch (RuntimeException e) {
             e.printStackTrace();
-            if (e.getMessage().equals("OAUTH_CODE_INVALID")) {
-                return ResponseEntity
-                        .badRequest()
-                        .body(Map.of(
-                                "error", "OAUTH_CODE_INVALID",
-                                "message", "El login expiró o ya fue usado. Intenta de nuevo."
-                        ));
+
+            String error = e.getMessage();
+            String redirectUrl;
+
+            if ("OAUTH_CODE_INVALID".equals(error)) {
+                redirectUrl = "http://localhost:5137/auth/error?error=OAUTH_CODE_INVALID";
+            } else {
+                redirectUrl = "http://localhost:5137/auth/error?error=INTERNAL_ERROR";
             }
 
-            return ResponseEntity
-                    .status(500)
-                    .body(Map.of(
-                            "error", "INTERNAL_ERROR",
-                            "message", e.getMessage()
-                    ));
+            response.sendRedirect(redirectUrl);
         }
     }
+
 }
