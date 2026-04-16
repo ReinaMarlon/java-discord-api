@@ -10,6 +10,7 @@ spring:
 
   frontend:
     set-secure: ${SET_SECURE}
+    base-url: ${BASE_URL}
     redirect-url: ${REDIRECT_URL}
 
 logging:

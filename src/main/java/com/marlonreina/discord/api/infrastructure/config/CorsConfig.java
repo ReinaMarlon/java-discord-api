@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.*;
 @Configuration
 public class CorsConfig {
 
-    @Value("${spring.frontend.redirect-url}")
+    @Value("${spring.frontend.base-url}")
     public String frontendBaseUrl;
 
     @Bean

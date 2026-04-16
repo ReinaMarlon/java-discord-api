@@ -11,6 +11,7 @@ spring:
   frontend:
     set-secure: false
     redirect-url: http://localhost8080/api/v1/auth/callback
+    base-url: http://localhost8080/
 
   jpa:
     hibernate:
