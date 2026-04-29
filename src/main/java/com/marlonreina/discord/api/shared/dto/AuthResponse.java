@@ -2,7 +2,7 @@ package com.marlonreina.discord.api.shared.dto;
 
 public class AuthResponse {
 
-    private String token;
+    private final String token;
 
     public AuthResponse(String token) {
         this.token = token;

@@ -56,14 +56,4 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
         return user;
     }
-
-    private UserEntity toEntity(User user) {
-        UserEntity entity = new UserEntity();
-        entity.setDiscordId(user.getId());
-        entity.setUsername(user.getUsername());
-        entity.setAvatar(user.getAvatar());
-        entity.setEmail(user.getEmail());
-        entity.setAccessToken(user.getAccessToken());
-        return entity;
-    }
 }

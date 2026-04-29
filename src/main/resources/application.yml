@@ -8,8 +8,13 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
+  datasource:
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+
   frontend:
-    set-secure: ${SET_SECURE}
+    set-secure: ${SET_SECURE:false}
     base-url: ${BASE_URL}
     redirect-url: ${REDIRECT_URL}
 
@@ -20,15 +25,11 @@ logging:
     com.marlonreina.discord.api: DEBUG
 
 
-datasource:
-  hikari:
-    connection-timeout: 30000
-    maximum-pool-size: 10
-
 server:
   port: ${PORT:8080}
 
 discord:
+  bot-token: ${BOT_TOKEN}
   oauth:
     scopes: ${OAUTH_SCOPES}
 

@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 public class DiscordOauthAdapter implements DiscordOauthPort {
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private static final int BAD_REQUEST_STATUS = 400;
 
     @Value("${spring.discord.client-id}")
     private String clientId;
@@ -66,11 +67,11 @@ public class DiscordOauthAdapter implements DiscordOauthPort {
 
         } catch (HttpClientErrorException e) {
 
-            if (e.getStatusCode().value() == 400) {
-                throw new RuntimeException("OAUTH_CODE_INVALID");
+            if (e.getStatusCode().value() == BAD_REQUEST_STATUS) {
+                throw new RuntimeException("OAUTH_CODE_INVALID", e);
             }
 
-            throw new RuntimeException("DISCORD_OAUTH_ERROR");
+            throw new RuntimeException("DISCORD_OAUTH_ERROR", e);
         }
     }
 

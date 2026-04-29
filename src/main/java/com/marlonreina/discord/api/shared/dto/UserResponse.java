@@ -1,21 +1,20 @@
 package com.marlonreina.discord.api.shared.dto;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 public class UserResponse {
 
-    private String id;
-    private String username;
-    private String avatar;
-    private List<GuildResponse> guilds;
+    private final String id;
+    private final String username;
+    private final String avatar;
+    private final List<GuildResponse> guilds;
 
     public UserResponse(String id, String username, String avatar, List<GuildResponse> guilds) {
         this.id = id;
         this.username = username;
         this.avatar = avatar;
-        this.guilds = new ArrayList<>(guilds);
+        this.guilds = List.copyOf(guilds);
     }
 
     public String getId() {
