@@ -10,8 +10,8 @@ spring:
 
   frontend:
     set-secure: false
-    redirect-url: http://localhost8080/api/v1/auth/callback
-    base-url: http://localhost8080/
+    redirect-url: http://localhost:8080/api/v1/auth/callback
+    base-url: http://localhost:8080/
 
   jpa:
     hibernate:
@@ -20,23 +20,19 @@ spring:
 
   discord:
     client-id: 57363473
-    client-secret: 12569784gvds252141546y8
-    redirect-uri: http://localhost8080/api/v1/auth/callback
+    client-secret: test-client-secret
+    redirect-uri: http://localhost:8080/api/v1/auth/callback
 
-  jwt_secret: 31224912469dsjhahdfks193y12
+  jwt-secret: test-jwt-secret-value-for-context-loads
 
 discord:
+  bot-token: test-bot-token
   oauth:
     scopes: identify
 
 logging:
   level:
     org.springframework.web: ERROR
-
-datasource:
-  hikari:
-    connection-timeout: 30000
-    maximum-pool-size: 10
 
 server:
   port: ${PORT:8080}

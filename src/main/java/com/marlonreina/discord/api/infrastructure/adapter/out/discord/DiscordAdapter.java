@@ -1,12 +1,14 @@
 package com.marlonreina.discord.api.infrastructure.adapter.out.discord;
 
+import com.marlonreina.discord.api.domain.model.DiscordChannel;
 import com.marlonreina.discord.api.domain.model.DiscordGuild;
+import com.marlonreina.discord.api.domain.model.DiscordMember;
+import com.marlonreina.discord.api.domain.model.DiscordRole;
 import com.marlonreina.discord.api.domain.model.DiscordUser;
-import com.marlonreina.discord.api.domain.model.User;
 import com.marlonreina.discord.api.domain.port.out.DiscordPort;
-import com.marlonreina.discord.api.domain.port.out.UserRepositoryPort;
 import com.marlonreina.discord.api.infrastructure.adapter.out.security.DiscordTokenService;
-import com.marlonreina.discord.api.infrastructure.adapter.out.security.DiscordTokenStore;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -16,18 +18,28 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class DiscordAdapter implements DiscordPort {
 
-    // private final DiscordTokenStore tokenStore;
+    private static final ParameterizedTypeReference<Map<String, Object>> MAP_RESPONSE =
+            new ParameterizedTypeReference<>() {
+            };
+    private static final ParameterizedTypeReference<List<Map<String, Object>>> LIST_OF_MAPS_RESPONSE =
+            new ParameterizedTypeReference<>() {
+            };
+
     private final RestTemplate restTemplate = new RestTemplate();
-    private final UserRepositoryPort userRepository;
     private final DiscordTokenService tokenService;
 
-    public DiscordAdapter(DiscordTokenService tokenService, UserRepositoryPort userRepository) {
+    private final Map<String, List<DiscordGuild>> guildCache = new ConcurrentHashMap<>();
+
+    @Value("${discord.bot-token}")
+    private String botToken;
+
+    public DiscordAdapter(DiscordTokenService tokenService) {
         this.tokenService = tokenService;
-        this.userRepository = userRepository;
     }
 
     @Override
@@ -40,14 +52,17 @@ public class DiscordAdapter implements DiscordPort {
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 "https://discord.com/api/users/@me",
                 HttpMethod.GET,
                 entity,
-                Map.class
+                MAP_RESPONSE
         );
 
-        Map body = response.getBody();
+        Map<String, Object> body = response.getBody();
+        if (body == null) {
+            throw new RuntimeException("DISCORD_USER_NULL");
+        }
 
         return new DiscordUser(
                 (String) body.get("id"),
@@ -59,7 +74,9 @@ public class DiscordAdapter implements DiscordPort {
     @Override
     public List<DiscordGuild> getUserGuilds(String discordId) {
 
-        // String token = getAccessToken(discordId);
+        if (guildCache.containsKey(discordId)) {
+            return guildCache.get(discordId);
+        }
 
         String token = tokenService.getValidAccessToken(discordId);
 
@@ -68,16 +85,19 @@ public class DiscordAdapter implements DiscordPort {
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<List> response = restTemplate.exchange(
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
                 "https://discord.com/api/users/@me/guilds",
                 HttpMethod.GET,
                 entity,
-                List.class
+                LIST_OF_MAPS_RESPONSE
         );
 
         List<Map<String, Object>> guilds = response.getBody();
+        if (guilds == null) {
+            return List.of();
+        }
 
-        return guilds.stream().map(g -> new DiscordGuild(
+        List<DiscordGuild> result = guilds.stream().map(g -> new DiscordGuild(
                 (String) g.get("id"),
                 (String) g.get("name"),
                 (String) g.get("icon"),
@@ -85,5 +105,98 @@ public class DiscordAdapter implements DiscordPort {
                 (Boolean) g.get("owner"),
                 Long.parseLong(g.get("permissions").toString())
         )).toList();
+
+        guildCache.put(discordId, result);
+
+        return result;
+    }
+
+    @Override
+    public List<DiscordChannel> getGuildChannels(String guildId) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bot " + botToken);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                "https://discord.com/api/guilds/" + guildId + "/channels",
+                HttpMethod.GET,
+                entity,
+                LIST_OF_MAPS_RESPONSE
+        );
+
+        List<Map<String, Object>> channels = response.getBody();
+
+        if (channels == null) {
+            return List.of();
+        }
+
+        return channels.stream().map(c -> new DiscordChannel(
+                (String) c.get("id"),
+                (String) c.get("name"),
+                (Integer) c.get("type")
+        )).toList();
+    }
+
+    @Override
+    public List<DiscordRole> getGuildRoles(String guildId) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bot " + botToken);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                "https://discord.com/api/guilds/" + guildId + "/roles",
+                HttpMethod.GET,
+                entity,
+                LIST_OF_MAPS_RESPONSE
+        );
+
+        List<Map<String, Object>> roles = response.getBody();
+
+        if (roles == null) {
+            return List.of();
+        }
+
+        return roles.stream().map(r -> new DiscordRole(
+                (String) r.get("id"),
+                (String) r.get("name")
+        )).toList();
+    }
+
+    @Override
+    public List<DiscordMember> getGuildMembers(String guildId) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bot " + botToken);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                "https://discord.com/api/guilds/" + guildId + "/members?limit=1000",
+                HttpMethod.GET,
+                entity,
+                LIST_OF_MAPS_RESPONSE
+        );
+
+        List<Map<String, Object>> members = response.getBody();
+
+        if (members == null) {
+            return List.of();
+        }
+
+        return members.stream().map(member -> {
+            Object userValue = member.get("user");
+            if (!(userValue instanceof Map<?, ?> user)) {
+                throw new RuntimeException("DISCORD_MEMBER_USER_NULL");
+            }
+
+            return new DiscordMember(
+                    (String) user.get("id"),
+                    (String) user.get("username")
+            );
+        }).toList();
     }
 }

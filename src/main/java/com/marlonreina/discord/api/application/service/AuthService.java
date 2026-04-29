@@ -6,14 +6,17 @@ import com.marlonreina.discord.api.domain.port.out.DiscordOauthPort;
 import com.marlonreina.discord.api.domain.port.out.JwtPort;
 import com.marlonreina.discord.api.domain.port.out.UserRepositoryPort;
 import com.marlonreina.discord.api.infrastructure.adapter.out.security.DiscordTokenStore;
-import com.marlonreina.discord.api.shared.dto.AuthResponse;
 import com.marlonreina.discord.api.shared.dto.DiscordTokenResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
 public class AuthService implements AuthUseCase {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
 
     private final DiscordOauthPort discordOauthPort;
     private final JwtPort jwtPort;
@@ -46,7 +49,7 @@ public class AuthService implements AuthUseCase {
         user.setExpiresAt(
                 LocalDateTime.now().plusSeconds(tokenResponse.getExpiresIn())
         );
-        System.out.println("USER ID: " + user.getId());
+        LOGGER.debug("Authenticated Discord user {}", user.getId());
         userRepository.save(user);
 
         tokenStore.save(user.getId(), tokenResponse.getAccessToken());
