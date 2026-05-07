@@ -6,6 +6,7 @@ import com.marlonreina.discord.api.domain.model.GuildConfigAggregate;
 import com.marlonreina.discord.api.domain.model.GuildFeatures;
 import com.marlonreina.discord.api.domain.model.LogConfig;
 import com.marlonreina.discord.api.domain.model.WelcomeConfig;
+import com.marlonreina.discord.api.domain.model.WelcomeConfigUpdate;
 import com.marlonreina.discord.api.domain.port.out.GuildConfigRepositoryPort;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.AdsConfigEntity;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.CommandEntity;
@@ -76,12 +77,35 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
         );
     }
 
+    @Override
+    public WelcomeConfig saveWelcomeConfig(WelcomeConfigUpdate update) {
+        configRepository.findById(update.getGuildId())
+                .orElseGet(() -> createDefaultConfig(update.getGuildId()));
+
+        WelcomeConfigEntity welcome = welcomeRepository.findById(update.getGuildId())
+                .orElseGet(() -> createDefaultWelcomeConfig(update.getGuildId()));
+
+        welcome.setEnabled(update.isEnabled());
+        welcome.setChannelId(update.getChannelId());
+        welcome.setMessage(update.getMessage());
+        welcome.setEmbedJson(update.getEmbedJson());
+
+        return mapWelcome(welcomeRepository.save(welcome));
+    }
+
     private GuildConfigEntity createDefaultConfig(String guildId) {
         GuildConfigEntity config = new GuildConfigEntity();
         config.setGuildId(guildId);
         config.setPrefix(DEFAULT_PREFIX);
 
         return configRepository.save(config);
+    }
+
+    private WelcomeConfigEntity createDefaultWelcomeConfig(String guildId) {
+        WelcomeConfigEntity welcome = new WelcomeConfigEntity();
+        welcome.setGuildId(guildId);
+
+        return welcome;
     }
 
     private GuildFeatures mapFeatures(GuildConfigEntity config, WelcomeConfigEntity welcome) {

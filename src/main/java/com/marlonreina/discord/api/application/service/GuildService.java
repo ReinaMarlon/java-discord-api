@@ -1,13 +1,20 @@
 package com.marlonreina.discord.api.application.service;
 
+import com.marlonreina.discord.api.application.dto.request.WelcomeConfigRequest;
 import com.marlonreina.discord.api.application.dto.response.GuildFullDataResponse;
 import com.marlonreina.discord.api.domain.model.DiscordChannel;
 import com.marlonreina.discord.api.domain.model.DiscordGuild;
 import com.marlonreina.discord.api.domain.model.DiscordRole;
 import com.marlonreina.discord.api.domain.model.GuildConfigAggregate;
+import com.marlonreina.discord.api.domain.model.WelcomeConfig;
+import com.marlonreina.discord.api.domain.model.WelcomeConfigUpdate;
 import com.marlonreina.discord.api.domain.port.out.DiscordPort;
 import com.marlonreina.discord.api.domain.port.out.GuildConfigRepositoryPort;
+import org.apache.logging.log4j.internal.annotation.SuppressFBWarnings;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -17,12 +24,20 @@ public class GuildService {
     private final GuildConfigRepositoryPort guildConfigRepository;
     private final DiscordPort discordPort;
 
+    @SuppressFBWarnings(
+            value = "EI_EXPOSE_REP2",
+            justification = "ObjectMapper is a Spring-managed singleton used only for serialization"
+    )
+    private final ObjectMapper objectMapper;
+
     public GuildService(
             GuildConfigRepositoryPort guildConfigRepository,
-            DiscordPort discordPort
+            DiscordPort discordPort,
+            ObjectMapper objectMapper
     ) {
         this.guildConfigRepository = guildConfigRepository;
         this.discordPort = discordPort;
+        this.objectMapper = objectMapper;
     }
 
     public void assertAccess(String userId, String guildId) {
@@ -44,11 +59,58 @@ public class GuildService {
         return new GuildFullDataResponse(config, channels, roles);
     }
 
+    public WelcomeConfig updateWelcomeConfig(
+            String guildId,
+            String userId,
+            WelcomeConfigRequest request
+    ) {
+        assertAccess(userId, guildId);
+        validateWelcomeRequest(guildId, request);
+
+        WelcomeConfigUpdate update = new WelcomeConfigUpdate(
+                guildId,
+                Boolean.TRUE.equals(request.getEnabled()),
+                request.getChannelId(),
+                extractRawMessage(request.getTemplate()),
+                serializePayload(request)
+        );
+
+        return guildConfigRepository.saveWelcomeConfig(update);
+    }
+
     private DiscordGuild findAccessibleGuild(String userId, String guildId) {
         return discordPort.getUserGuilds(userId)
                 .stream()
                 .filter(guild -> guild.getId().equals(guildId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No access"));
+    }
+
+    private void validateWelcomeRequest(String guildId, WelcomeConfigRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("WELCOME_PAYLOAD_REQUIRED");
+        }
+        if (request.getGuildId() != null && !guildId.equals(request.getGuildId())) {
+            throw new IllegalArgumentException("GUILD_ID_MISMATCH");
+        }
+        if (request.getModule() != null && !"welcome".equals(request.getModule())) {
+            throw new IllegalArgumentException("WELCOME_MODULE_REQUIRED");
+        }
+    }
+
+    private String extractRawMessage(JsonNode template) {
+        if (template == null || template.get("raw") == null || template.get("raw").isNull()) {
+            return null;
+        }
+
+        return template.get("raw").asText();
+    }
+
+    private String serializePayload(WelcomeConfigRequest request) {
+        try {
+            return objectMapper.writeValueAsString(request);
+        } catch (JacksonException e) {
+            throw new RuntimeException("WELCOME_PAYLOAD_INVALID", e);
+        }
     }
 }
