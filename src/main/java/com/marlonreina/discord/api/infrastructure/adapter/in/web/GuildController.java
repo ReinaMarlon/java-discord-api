@@ -51,11 +51,10 @@ public class GuildController {
     public ResponseEntity<WelcomeImage> updateWelcomeImage(
             @PathVariable String guildId,
             @RequestParam("image") MultipartFile image,
-            @RequestParam("guildId") String requestGuildId,
             Authentication auth
     ) {
         String userId = auth.getName();
-        WelcomeImage welcomeImage = guildService.updateWelcomeImage(guildId, userId, requestGuildId, image);
+        WelcomeImage welcomeImage = guildService.updateWelcomeImage(guildId, userId, image);
 
         return ResponseEntity.ok(welcomeImage);
     }
