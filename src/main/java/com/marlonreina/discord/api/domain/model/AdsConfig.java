@@ -3,9 +3,9 @@ package com.marlonreina.discord.api.domain.model;
 public class AdsConfig {
 
     private final boolean enabled;
-    private final Long channelId;
+    private final String channelId;
 
-    public AdsConfig(boolean enabled, Long channelId) {
+    public AdsConfig(boolean enabled, String channelId) {
         this.enabled = enabled;
         this.channelId = channelId;
     }
@@ -14,7 +14,7 @@ public class AdsConfig {
         return enabled;
     }
 
-    public Long getChannelId() {
+    public String getChannelId() {
         return channelId;
     }
 }

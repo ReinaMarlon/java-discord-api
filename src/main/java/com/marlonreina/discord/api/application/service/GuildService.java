@@ -2,11 +2,11 @@ package com.marlonreina.discord.api.application.service;
 
 import com.marlonreina.discord.api.application.dto.response.GuildFullDataResponse;
 import com.marlonreina.discord.api.domain.model.DiscordChannel;
-import com.marlonreina.discord.api.domain.model.DiscordMember;
+import com.marlonreina.discord.api.domain.model.DiscordGuild;
 import com.marlonreina.discord.api.domain.model.DiscordRole;
 import com.marlonreina.discord.api.domain.model.GuildConfigAggregate;
-import com.marlonreina.discord.api.domain.port.out.GuildConfigRepositoryPort;
 import com.marlonreina.discord.api.domain.port.out.DiscordPort;
+import com.marlonreina.discord.api.domain.port.out.GuildConfigRepositoryPort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,19 +26,13 @@ public class GuildService {
     }
 
     public void assertAccess(String userId, String guildId) {
-        boolean hasAccess = discordPort.getUserGuilds(userId)
-                .stream()
-                .anyMatch(g -> g.getId().equals(guildId));
-
-        if (!hasAccess) {
-            throw new RuntimeException("No access");
-        }
+        findAccessibleGuild(userId, guildId);
     }
 
     public GuildConfigAggregate getFullConfig(String guildId, String userId) {
-        assertAccess(userId, guildId);
+        DiscordGuild guild = findAccessibleGuild(userId, guildId);
 
-        return guildConfigRepository.findOrCreateByGuildId(guildId);
+        return guildConfigRepository.findOrCreateByGuildId(guildId, guild.getName());
     }
 
     public GuildFullDataResponse getFullGuildData(String guildId, String userId) {
@@ -46,8 +40,15 @@ public class GuildService {
 
         List<DiscordChannel> channels = discordPort.getGuildChannels(guildId);
         List<DiscordRole> roles = discordPort.getGuildRoles(guildId);
-        List<DiscordMember> members = discordPort.getGuildMembers(guildId);
 
-        return new GuildFullDataResponse(config, channels, roles, members);
+        return new GuildFullDataResponse(config, channels, roles);
+    }
+
+    private DiscordGuild findAccessibleGuild(String userId, String guildId) {
+        return discordPort.getUserGuilds(userId)
+                .stream()
+                .filter(guild -> guild.getId().equals(guildId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No access"));
     }
 }

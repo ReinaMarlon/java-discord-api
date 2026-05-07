@@ -4,5 +4,5 @@ import com.marlonreina.discord.api.domain.model.GuildConfigAggregate;
 
 public interface GuildConfigRepositoryPort {
 
-    GuildConfigAggregate findOrCreateByGuildId(String guildId);
+    GuildConfigAggregate findOrCreateByGuildId(String guildId, String guildName);
 }
