@@ -119,6 +119,13 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
         return mapWelcomeImage(welcomeImageRepository.save(image));
     }
 
+    @Override
+    public java.util.Optional<com.marlonreina.discord.api.domain.model.WelcomeImageContent>
+            findWelcomeImageContentByGuildId(String guildId) {
+        return welcomeImageRepository.findById(guildId)
+                .map(this::mapWelcomeImageContent);
+    }
+
     private GuildConfigEntity createDefaultConfig(String guildId) {
         GuildConfigEntity config = new GuildConfigEntity();
         config.setGuildId(guildId);
@@ -188,11 +195,22 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
         return new WelcomeImage(
                 entity.getGuildId(),
                 entity.getImageUrl(),
+                entity.getImageName(),
                 entity.getImageHash(),
                 entity.getMimeType(),
                 entity.getWidth(),
                 entity.getHeight(),
                 entity.getUpdatedAt()
+        );
+    }
+
+    private com.marlonreina.discord.api.domain.model.WelcomeImageContent mapWelcomeImageContent(
+            WelcomeImageEntity entity
+    ) {
+        return new com.marlonreina.discord.api.domain.model.WelcomeImageContent(
+                entity.getImageName(),
+                entity.getImageData(),
+                entity.getMimeType()
         );
     }
 

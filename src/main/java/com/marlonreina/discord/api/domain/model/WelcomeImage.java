@@ -6,6 +6,7 @@ public class WelcomeImage {
 
     private final String guildId;
     private final String imageUrl;
+    private final String imageName;
     private final String imageHash;
     private final String mimeType;
     private final int width;
@@ -15,6 +16,7 @@ public class WelcomeImage {
     public WelcomeImage(
             String guildId,
             String imageUrl,
+            String imageName,
             String imageHash,
             String mimeType,
             int width,
@@ -23,6 +25,7 @@ public class WelcomeImage {
     ) {
         this.guildId = guildId;
         this.imageUrl = imageUrl;
+        this.imageName = imageName;
         this.imageHash = imageHash;
         this.mimeType = mimeType;
         this.width = width;
@@ -36,6 +39,10 @@ public class WelcomeImage {
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public String getImageName() {
+        return imageName;
     }
 
     public String getImageHash() {
