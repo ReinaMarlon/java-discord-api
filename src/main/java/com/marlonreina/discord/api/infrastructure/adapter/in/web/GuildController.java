@@ -66,6 +66,15 @@ public class GuildController {
 
     @GetMapping("/{guildId}/config/welcome/image")
     public ResponseEntity<byte[]> getWelcomeImage(@PathVariable String guildId) {
+        return getWelcomeImageContent(guildId);
+    }
+
+    @GetMapping("/{guildId}/config/welcome/image/raw")
+    public ResponseEntity<byte[]> getWelcomeImageRaw(@PathVariable String guildId) {
+        return getWelcomeImageContent(guildId);
+    }
+
+    private ResponseEntity<byte[]> getWelcomeImageContent(String guildId) {
         return guildService.getWelcomeImage(guildId)
                 .map(image -> ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(image.getMimeType()))

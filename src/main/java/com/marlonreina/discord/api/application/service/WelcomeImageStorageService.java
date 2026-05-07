@@ -18,17 +18,17 @@ import java.util.Locale;
 @Service
 public class WelcomeImageStorageService {
 
-    @Value("${spring.frontend.welcome-url-template}")
-    private static String WELCOME_IMAGE_URL_TEMPLATE;
-
     private static final String SHA_256 = "SHA-256";
 
     private final String welcomeImagesStoragePath;
+    private final String welcomeImageUrlTemplate;
 
     public WelcomeImageStorageService(
-            @Value("${welcome.images.storage-path:uploads/welcome-images}") String welcomeImagesStoragePath
+            @Value("${welcome.images.storage-path:uploads/welcome-images}") String welcomeImagesStoragePath,
+            @Value("${spring.frontend.welcome-url-template}") String welcomeImageUrlTemplate
     ) {
         this.welcomeImagesStoragePath = welcomeImagesStoragePath;
+        this.welcomeImageUrlTemplate = welcomeImageUrlTemplate;
     }
 
     public WelcomeImageUpdate store(String guildId, MultipartFile image) {
@@ -54,7 +54,7 @@ public class WelcomeImageStorageService {
 
             return new WelcomeImageUpdate(
                     guildId,
-                    WELCOME_IMAGE_URL_TEMPLATE.formatted(guildId),
+                    welcomeImageUrlTemplate.formatted(guildId),
                     image.getOriginalFilename(),
                     bytes,
                     imageHash,
