@@ -8,10 +8,13 @@ import com.marlonreina.discord.api.domain.model.DiscordRole;
 import com.marlonreina.discord.api.domain.model.GuildConfigAggregate;
 import com.marlonreina.discord.api.domain.model.WelcomeConfig;
 import com.marlonreina.discord.api.domain.model.WelcomeConfigUpdate;
+import com.marlonreina.discord.api.domain.model.WelcomeImage;
+import com.marlonreina.discord.api.domain.model.WelcomeImageUpdate;
 import com.marlonreina.discord.api.domain.port.out.DiscordPort;
 import com.marlonreina.discord.api.domain.port.out.GuildConfigRepositoryPort;
 import org.apache.logging.log4j.internal.annotation.SuppressFBWarnings;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -23,6 +26,7 @@ public class GuildService {
 
     private final GuildConfigRepositoryPort guildConfigRepository;
     private final DiscordPort discordPort;
+    private final WelcomeImageStorageService welcomeImageStorageService;
 
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP2",
@@ -33,11 +37,13 @@ public class GuildService {
     public GuildService(
             GuildConfigRepositoryPort guildConfigRepository,
             DiscordPort discordPort,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            WelcomeImageStorageService welcomeImageStorageService
     ) {
         this.guildConfigRepository = guildConfigRepository;
         this.discordPort = discordPort;
         this.objectMapper = objectMapper;
+        this.welcomeImageStorageService = welcomeImageStorageService;
     }
 
     public void assertAccess(String userId, String guildId) {
@@ -78,6 +84,19 @@ public class GuildService {
         return guildConfigRepository.saveWelcomeConfig(update);
     }
 
+    public WelcomeImage updateWelcomeImage(
+            String guildId,
+            String userId,
+            String requestGuildId,
+            MultipartFile image
+    ) {
+        assertAccess(userId, guildId);
+        validateWelcomeImageGuild(guildId, requestGuildId);
+
+        WelcomeImageUpdate update = welcomeImageStorageService.store(guildId, image);
+        return guildConfigRepository.saveWelcomeImage(update);
+    }
+
     private DiscordGuild findAccessibleGuild(String userId, String guildId) {
         return discordPort.getUserGuilds(userId)
                 .stream()
@@ -98,6 +117,12 @@ public class GuildService {
         }
     }
 
+    private void validateWelcomeImageGuild(String guildId, String requestGuildId) {
+        if (requestGuildId != null && !guildId.equals(requestGuildId)) {
+            throw new IllegalArgumentException("GUILD_ID_MISMATCH");
+        }
+    }
+
     private String extractRawMessage(JsonNode template) {
         if (template == null || template.get("raw") == null || template.get("raw").isNull()) {
             return null;
@@ -113,4 +138,5 @@ public class GuildService {
             throw new RuntimeException("WELCOME_PAYLOAD_INVALID", e);
         }
     }
+
 }

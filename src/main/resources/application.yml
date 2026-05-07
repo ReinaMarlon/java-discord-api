@@ -17,6 +17,7 @@ spring:
     set-secure: ${SET_SECURE:false}
     base-url: ${BASE_URL}
     redirect-url: ${REDIRECT_URL}
+    welcome-url-template: ${WELCOME_IMAGE_URL_TEMPLATE}
 
 logging:
   level:

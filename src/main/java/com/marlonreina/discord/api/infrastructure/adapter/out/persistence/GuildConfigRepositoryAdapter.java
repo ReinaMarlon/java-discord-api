@@ -7,6 +7,8 @@ import com.marlonreina.discord.api.domain.model.GuildFeatures;
 import com.marlonreina.discord.api.domain.model.LogConfig;
 import com.marlonreina.discord.api.domain.model.WelcomeConfig;
 import com.marlonreina.discord.api.domain.model.WelcomeConfigUpdate;
+import com.marlonreina.discord.api.domain.model.WelcomeImage;
+import com.marlonreina.discord.api.domain.model.WelcomeImageUpdate;
 import com.marlonreina.discord.api.domain.port.out.GuildConfigRepositoryPort;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.AdsConfigEntity;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.CommandEntity;
@@ -14,12 +16,14 @@ import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.GuildConfigEntity;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.LogConfigEntity;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.WelcomeConfigEntity;
+import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.WelcomeImageEntity;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.repository.AdsConfigJpaRepository;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.repository.CommandJpaRepository;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.repository.GuildCommandJpaRepository;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.repository.GuildConfigJpaRepository;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.repository.LogConfigJpaRepository;
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.repository.WelcomeConfigJpaRepository;
+import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.repository.WelcomeImageJpaRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -38,6 +42,7 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
     private final AdsConfigJpaRepository adsRepository;
     private final CommandJpaRepository commandRepository;
     private final GuildCommandJpaRepository guildCommandRepository;
+    private final WelcomeImageJpaRepository welcomeImageRepository;
 
     public GuildConfigRepositoryAdapter(
             GuildConfigJpaRepository configRepository,
@@ -45,7 +50,8 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
             LogConfigJpaRepository logRepository,
             AdsConfigJpaRepository adsRepository,
             CommandJpaRepository commandRepository,
-            GuildCommandJpaRepository guildCommandRepository
+            GuildCommandJpaRepository guildCommandRepository,
+            WelcomeImageJpaRepository welcomeImageRepository
     ) {
         this.configRepository = configRepository;
         this.welcomeRepository = welcomeRepository;
@@ -53,6 +59,7 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
         this.adsRepository = adsRepository;
         this.commandRepository = commandRepository;
         this.guildCommandRepository = guildCommandRepository;
+        this.welcomeImageRepository = welcomeImageRepository;
     }
 
     @Override
@@ -93,6 +100,23 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
         return mapWelcome(welcomeRepository.save(welcome));
     }
 
+    @Override
+    public WelcomeImage saveWelcomeImage(WelcomeImageUpdate update) {
+        configRepository.findById(update.getGuildId())
+                .orElseGet(() -> createDefaultConfig(update.getGuildId()));
+
+        WelcomeImageEntity image = welcomeImageRepository.findById(update.getGuildId())
+                .orElseGet(() -> createDefaultWelcomeImage(update.getGuildId()));
+
+        image.setImageUrl(update.getImageUrl());
+        image.setImageHash(update.getImageHash());
+        image.setMimeType(update.getMimeType());
+        image.setWidth(update.getWidth());
+        image.setHeight(update.getHeight());
+
+        return mapWelcomeImage(welcomeImageRepository.save(image));
+    }
+
     private GuildConfigEntity createDefaultConfig(String guildId) {
         GuildConfigEntity config = new GuildConfigEntity();
         config.setGuildId(guildId);
@@ -106,6 +130,13 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
         welcome.setGuildId(guildId);
 
         return welcome;
+    }
+
+    private WelcomeImageEntity createDefaultWelcomeImage(String guildId) {
+        WelcomeImageEntity image = new WelcomeImageEntity();
+        image.setGuildId(guildId);
+
+        return image;
     }
 
     private GuildFeatures mapFeatures(GuildConfigEntity config, WelcomeConfigEntity welcome) {
@@ -148,6 +179,18 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
         return new AdsConfig(
                 entity.isEnabled(),
                 entity.getChannelId()
+        );
+    }
+
+    private WelcomeImage mapWelcomeImage(WelcomeImageEntity entity) {
+        return new WelcomeImage(
+                entity.getGuildId(),
+                entity.getImageUrl(),
+                entity.getImageHash(),
+                entity.getMimeType(),
+                entity.getWidth(),
+                entity.getHeight(),
+                entity.getUpdatedAt()
         );
     }
 
