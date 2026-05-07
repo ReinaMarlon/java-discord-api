@@ -89,11 +89,9 @@ public class GuildService {
     public WelcomeImage updateWelcomeImage(
             String guildId,
             String userId,
-            String requestGuildId,
             MultipartFile image
     ) {
         assertAccess(userId, guildId);
-        validateWelcomeImageGuild(guildId, requestGuildId);
 
         WelcomeImageUpdate update = welcomeImageStorageService.store(guildId, image);
         return guildConfigRepository.saveWelcomeImage(update);
@@ -121,12 +119,6 @@ public class GuildService {
         }
         if (request.getModule() != null && !"welcome".equals(request.getModule())) {
             throw new IllegalArgumentException("WELCOME_MODULE_REQUIRED");
-        }
-    }
-
-    private void validateWelcomeImageGuild(String guildId, String requestGuildId) {
-        if (requestGuildId != null && !guildId.equals(requestGuildId)) {
-            throw new IllegalArgumentException("GUILD_ID_MISMATCH");
         }
     }
 
