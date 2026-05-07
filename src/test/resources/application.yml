@@ -12,6 +12,7 @@ spring:
     set-secure: false
     redirect-url: http://localhost:8080/api/v1/auth/callback
     base-url: http://localhost:8080/
+    welcome-url-template: http://localhost:8080/api/v1/guilds/1234/config/welcome/raw
 
   jpa:
     hibernate:

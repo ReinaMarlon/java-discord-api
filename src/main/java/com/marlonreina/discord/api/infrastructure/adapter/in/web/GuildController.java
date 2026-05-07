@@ -4,6 +4,7 @@ import com.marlonreina.discord.api.application.dto.request.WelcomeConfigRequest;
 import com.marlonreina.discord.api.application.dto.response.GuildFullDataResponse;
 import com.marlonreina.discord.api.application.service.GuildService;
 import com.marlonreina.discord.api.domain.model.WelcomeConfig;
+import com.marlonreina.discord.api.domain.model.WelcomeImage;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/guilds")
@@ -42,5 +45,18 @@ public class GuildController {
         WelcomeConfig welcome = guildService.updateWelcomeConfig(guildId, userId, request);
 
         return ResponseEntity.ok(welcome);
+    }
+
+    @PutMapping("/{guildId}/config/welcome/image")
+    public ResponseEntity<WelcomeImage> updateWelcomeImage(
+            @PathVariable String guildId,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam("guildId") String requestGuildId,
+            Authentication auth
+    ) {
+        String userId = auth.getName();
+        WelcomeImage welcomeImage = guildService.updateWelcomeImage(guildId, userId, requestGuildId, image);
+
+        return ResponseEntity.ok(welcomeImage);
     }
 }
