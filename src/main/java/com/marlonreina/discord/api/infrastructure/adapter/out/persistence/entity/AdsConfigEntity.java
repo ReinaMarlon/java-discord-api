@@ -11,18 +11,19 @@ public class AdsConfigEntity {
 
     @Id
     @Column(name = "guild_id")
-    private Long guildId;
+    private String guildId;
 
+    @Column(nullable = false)
     private boolean enabled;
 
     @Column(name = "channel_id")
-    private Long channelId;
+    private String channelId;
 
-    public Long getGuildId() {
+    public String getGuildId() {
         return guildId;
     }
 
-    public void setGuildId(Long guildId) {
+    public void setGuildId(String guildId) {
         this.guildId = guildId;
     }
 
@@ -34,11 +35,11 @@ public class AdsConfigEntity {
         this.enabled = enabled;
     }
 
-    public Long getChannelId() {
+    public String getChannelId() {
         return channelId;
     }
 
-    public void setChannelId(Long channelId) {
+    public void setChannelId(String channelId) {
         this.channelId = channelId;
     }
 }

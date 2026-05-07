@@ -8,8 +8,7 @@ public class GuildFullDataMapper {
         return new GuildFullDataResponse(
                 data.getConfig(),
                 data.getChannels(),
-                data.getRoles(),
-                data.getMembers()
+                data.getRoles()
         );
     }
 }

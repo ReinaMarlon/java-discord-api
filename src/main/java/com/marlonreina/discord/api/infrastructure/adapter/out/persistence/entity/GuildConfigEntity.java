@@ -14,9 +14,13 @@ public class GuildConfigEntity {
     @Column(name = "guild_id")
     private String guildId;
 
+    @Column(nullable = false, length = 10)
     private String prefix;
 
-    @Column(name = "created_at")
+    @Column(nullable = false)
+    private boolean premium;
+
+    @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     public String getGuildId() {
@@ -33,6 +37,14 @@ public class GuildConfigEntity {
 
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    public boolean isPremium() {
+        return premium;
+    }
+
+    public void setPremium(boolean premium) {
+        this.premium = premium;
     }
 
     public LocalDateTime getCreatedAt() {

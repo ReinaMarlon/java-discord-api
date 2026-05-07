@@ -27,6 +27,7 @@
     <rule ref="category/java/design.xml">
         <exclude name="AvoidCatchingGenericException"/>
         <exclude name="AvoidThrowingRawExceptionTypes"/>
+        <exclude name="CouplingBetweenObjects"/>
         <exclude name="DataClass"/>
         <exclude name="ImmutableField"/>
         <exclude name="LawOfDemeter"/>

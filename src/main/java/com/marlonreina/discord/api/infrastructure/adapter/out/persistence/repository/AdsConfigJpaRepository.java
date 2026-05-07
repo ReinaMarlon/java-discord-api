@@ -3,5 +3,5 @@ package com.marlonreina.discord.api.infrastructure.adapter.out.persistence.repos
 import com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity.AdsConfigEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AdsConfigJpaRepository extends JpaRepository<AdsConfigEntity, Long> {
+public interface AdsConfigJpaRepository extends JpaRepository<AdsConfigEntity, String> {
 }

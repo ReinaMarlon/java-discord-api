@@ -13,12 +13,16 @@ public class WelcomeConfigEntity {
     @Column(name = "guild_id")
     private String guildId;
 
+    @Column(nullable = false)
+    private boolean enabled;
+
     @Column(name = "channel_id")
     private String channelId;
 
+    @Column(columnDefinition = "TEXT")
     private String message;
 
-    @Column(name = "embed_json")
+    @Column(name = "embed_json", columnDefinition = "TEXT")
     private String embedJson;
 
     public String getGuildId() {
@@ -51,5 +55,13 @@ public class WelcomeConfigEntity {
 
     public void setEmbedJson(String embedJson) {
         this.embedJson = embedJson;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
