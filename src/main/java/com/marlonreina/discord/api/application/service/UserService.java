@@ -70,7 +70,8 @@ public class UserService implements UserUseCase {
                 g.getId(),
                 g.getName(),
                 g.getIcon(),
-                g.getBanner()
+                g.getBanner(),
+                discordPort.isBotPresentInGuild(g.getId())
         );
     }
 }

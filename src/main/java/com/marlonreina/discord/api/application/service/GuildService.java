@@ -13,6 +13,7 @@ import com.marlonreina.discord.api.domain.model.WelcomeImageUpdate;
 import com.marlonreina.discord.api.domain.port.out.DiscordPort;
 import com.marlonreina.discord.api.domain.port.out.GuildConfigRepositoryPort;
 import org.apache.logging.log4j.internal.annotation.SuppressFBWarnings;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.core.JacksonException;
@@ -27,6 +28,7 @@ public class GuildService {
     private final GuildConfigRepositoryPort guildConfigRepository;
     private final DiscordPort discordPort;
     private final WelcomeImageStorageService welcomeImageStorageService;
+    private static final long ADMINISTRATOR_PERMISSION = 0x8L;
 
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP2",
@@ -47,11 +49,11 @@ public class GuildService {
     }
 
     public void assertAccess(String userId, String guildId) {
-        findAccessibleGuild(userId, guildId);
+        findManageableGuild(userId, guildId);
     }
 
     public GuildConfigAggregate getFullConfig(String guildId, String userId) {
-        DiscordGuild guild = findAccessibleGuild(userId, guildId);
+        DiscordGuild guild = findManageableGuild(userId, guildId);
 
         return guildConfigRepository.findOrCreateByGuildId(guildId, guild.getName());
     }
@@ -97,12 +99,17 @@ public class GuildService {
         return guildConfigRepository.saveWelcomeImage(update);
     }
 
-    private DiscordGuild findAccessibleGuild(String userId, String guildId) {
+    private DiscordGuild findManageableGuild(String userId, String guildId) {
         return discordPort.getUserGuilds(userId)
                 .stream()
                 .filter(guild -> guild.getId().equals(guildId))
+                .filter(guild -> guild.isOwner() || isAdmin(guild))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No access"));
+                .orElseThrow(() -> new AccessDeniedException("GUILD_ACCESS_DENIED"));
+    }
+
+    private boolean isAdmin(DiscordGuild guild) {
+        return (guild.getPermissions() & ADMINISTRATOR_PERMISSION) == ADMINISTRATOR_PERMISSION;
     }
 
     private void validateWelcomeRequest(String guildId, WelcomeConfigRequest request) {

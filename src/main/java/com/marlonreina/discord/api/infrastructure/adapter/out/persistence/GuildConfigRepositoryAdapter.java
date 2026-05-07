@@ -109,6 +109,8 @@ public class GuildConfigRepositoryAdapter implements GuildConfigRepositoryPort {
                 .orElseGet(() -> createDefaultWelcomeImage(update.getGuildId()));
 
         image.setImageUrl(update.getImageUrl());
+        image.setImageName(update.getImageName());
+        image.setImageData(update.getImageData());
         image.setImageHash(update.getImageHash());
         image.setMimeType(update.getMimeType());
         image.setWidth(update.getWidth());
