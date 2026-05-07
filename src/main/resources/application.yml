@@ -47,6 +47,11 @@ spring:
     password: ${PGPASSWORD}
     driver-class-name: org.postgresql.Driver
 
+    welcome-image-url: jdbc:postgresql://${WELCOME_IMAGE_RAILWAY_TCP_PROXY_DOMAIN}:${WELCOME_IMAGE_RAILWAY_TCP_PROXY_PORT}/${WELCOME_IMAGE_PGDATABASE}
+    welcome-image-username: ${WELCOME_IMAGE_PGUSER}
+    welcome-image-password: ${WELCOME_IMAGE_PGPASSWORD}
+    welcome-image-driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
