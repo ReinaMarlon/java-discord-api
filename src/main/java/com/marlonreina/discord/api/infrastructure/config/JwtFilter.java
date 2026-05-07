@@ -22,6 +22,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtFilter.class);
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String JWT_COOKIE_NAME = "jwt";
+    private static final String WELCOME_IMAGE_PATH_SUFFIX = "/config/welcome/image";
 
     private final JwtPort jwtPort;
 
@@ -37,24 +38,28 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = resolveToken(request);
+        boolean welcomeImageUpload = isWelcomeImageUpload(request);
+
+        if (welcomeImageUpload && token == null) {
+            LOGGER.warn(
+                    "Welcome image upload has no JWT. authorizationHeaderPresent={}, cookiesPresent={}, contentType={}",
+                    request.getHeader("Authorization") != null,
+                    request.getCookies() != null,
+                    request.getContentType()
+            );
+        }
 
         if (token != null) {
             try {
                 String userId = jwtPort.extractUserId(token);
-
-                if (userId != null) {
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(
-                                    userId,
-                                    null,
-                                    List.of()
-                            );
-
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
+                authenticate(userId, welcomeImageUpload);
 
             } catch (RuntimeException e) {
-                LOGGER.debug("Invalid JWT received", e);
+                if (welcomeImageUpload) {
+                    LOGGER.warn("Welcome image upload received an invalid JWT: {}", e.getMessage());
+                } else {
+                    LOGGER.debug("Invalid JWT received", e);
+                }
                 SecurityContextHolder.clearContext();
             }
         }
@@ -80,5 +85,28 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         return null;
+    }
+
+    private void authenticate(String userId, boolean welcomeImageUpload) {
+        if (userId == null) {
+            return;
+        }
+
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(
+                        userId,
+                        null,
+                        List.of()
+                );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        if (welcomeImageUpload) {
+            LOGGER.debug("Welcome image upload authenticated for userId={}", userId);
+        }
+    }
+
+    private boolean isWelcomeImageUpload(HttpServletRequest request) {
+        return "PUT".equalsIgnoreCase(request.getMethod())
+                && request.getRequestURI().endsWith(WELCOME_IMAGE_PATH_SUFFIX);
     }
 }
