@@ -55,6 +55,8 @@ public class WelcomeImageStorageService {
             return new WelcomeImageUpdate(
                     guildId,
                     WELCOME_IMAGE_URL_TEMPLATE.formatted(guildId),
+                    image.getOriginalFilename(),
+                    bytes,
                     imageHash,
                     mimeType,
                     bufferedImage.getWidth(),

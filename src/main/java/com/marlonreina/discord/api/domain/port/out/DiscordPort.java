@@ -14,6 +14,8 @@ public interface DiscordPort {
 
     List<DiscordGuild> getUserGuilds(String discordId);
 
+    boolean isBotPresentInGuild(String guildId);
+
     List<DiscordChannel> getGuildChannels(String guildId);
 
     List<DiscordRole> getGuildRoles(String guildId);

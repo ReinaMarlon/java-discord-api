@@ -29,11 +29,14 @@ public class DiscordAdapter implements DiscordPort {
     private static final ParameterizedTypeReference<List<Map<String, Object>>> LIST_OF_MAPS_RESPONSE =
             new ParameterizedTypeReference<>() {
             };
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BOT_AUTH_PREFIX = "Bot ";
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final DiscordTokenService tokenService;
 
     private final Map<String, List<DiscordGuild>> guildCache = new ConcurrentHashMap<>();
+    private volatile List<String> botGuildIds;
 
     @Value("${discord.bot-token}")
     private String botToken;
@@ -112,10 +115,45 @@ public class DiscordAdapter implements DiscordPort {
     }
 
     @Override
+    public boolean isBotPresentInGuild(String guildId) {
+        return getBotGuildIds().contains(guildId);
+    }
+
+    private List<String> getBotGuildIds() {
+        if (botGuildIds != null) {
+            return botGuildIds;
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(AUTHORIZATION_HEADER, BOT_AUTH_PREFIX + botToken);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                "https://discord.com/api/users/@me/guilds",
+                HttpMethod.GET,
+                entity,
+                LIST_OF_MAPS_RESPONSE
+        );
+
+        List<Map<String, Object>> guilds = response.getBody();
+        if (guilds == null) {
+            botGuildIds = List.of();
+            return botGuildIds;
+        }
+
+        botGuildIds = guilds.stream()
+                .map(guild -> (String) guild.get("id"))
+                .toList();
+
+        return botGuildIds;
+    }
+
+    @Override
     public List<DiscordChannel> getGuildChannels(String guildId) {
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bot " + botToken);
+        headers.set(AUTHORIZATION_HEADER, BOT_AUTH_PREFIX + botToken);
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
@@ -143,7 +181,7 @@ public class DiscordAdapter implements DiscordPort {
     public List<DiscordRole> getGuildRoles(String guildId) {
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bot " + botToken);
+        headers.set(AUTHORIZATION_HEADER, BOT_AUTH_PREFIX + botToken);
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
@@ -170,7 +208,7 @@ public class DiscordAdapter implements DiscordPort {
     public List<DiscordMember> getGuildMembers(String guildId) {
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bot " + botToken);
+        headers.set(AUTHORIZATION_HEADER, BOT_AUTH_PREFIX + botToken);
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 

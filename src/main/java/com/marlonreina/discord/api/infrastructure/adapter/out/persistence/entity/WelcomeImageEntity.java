@@ -1,35 +1,19 @@
 package com.marlonreina.discord.api.infrastructure.adapter.out.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "welcome_images")
 public class WelcomeImageEntity {
 
-    @Id
-    @Column(name = "guild_id")
+    private static final byte[] EMPTY_IMAGE_DATA = new byte[0];
+
     private String guildId;
-
-    @Column(name = "image_url")
     private String imageUrl;
-
-    @Column(name = "image_hash")
+    private String imageName;
+    private byte[] imageData = EMPTY_IMAGE_DATA;
     private String imageHash;
-
-    @Column(name = "mime_type")
     private String mimeType;
-
     private int width;
     private int height;
-
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public String getGuildId() {
@@ -46,6 +30,22 @@ public class WelcomeImageEntity {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public byte[] getImageData() {
+        return imageData.clone();
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData == null ? EMPTY_IMAGE_DATA : imageData.clone();
     }
 
     public String getImageHash() {
@@ -88,9 +88,4 @@ public class WelcomeImageEntity {
         this.updatedAt = updatedAt;
     }
 
-    @PrePersist
-    @PreUpdate
-    public void markUpdatedAt() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }

@@ -20,14 +20,24 @@ public class CorsConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of(frontendBaseUrl));
+        config.setAllowedOriginPatterns(allowedOrigins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
         return source;
+    }
+
+    private List<String> allowedOrigins() {
+        String normalizedBaseUrl = frontendBaseUrl.replaceAll("/+$", "");
+
+        return List.of(
+                normalizedBaseUrl,
+                normalizedBaseUrl + "/"
+        );
     }
 }
