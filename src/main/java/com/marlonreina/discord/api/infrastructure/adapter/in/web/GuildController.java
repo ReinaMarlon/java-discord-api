@@ -5,6 +5,8 @@ import com.marlonreina.discord.api.application.dto.response.GuildFullDataRespons
 import com.marlonreina.discord.api.application.service.GuildService;
 import com.marlonreina.discord.api.domain.model.WelcomeConfig;
 import com.marlonreina.discord.api.domain.model.WelcomeImage;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,7 +49,10 @@ public class GuildController {
         return ResponseEntity.ok(welcome);
     }
 
-    @PutMapping("/{guildId}/config/welcome/image")
+    @PutMapping(
+            value = "/{guildId}/config/welcome/image",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<WelcomeImage> updateWelcomeImage(
             @PathVariable String guildId,
             @RequestParam("image") MultipartFile image,
@@ -57,5 +62,23 @@ public class GuildController {
         WelcomeImage welcomeImage = guildService.updateWelcomeImage(guildId, userId, image);
 
         return ResponseEntity.ok(welcomeImage);
+    }
+
+    @GetMapping("/{guildId}/config/welcome/image")
+    public ResponseEntity<byte[]> getWelcomeImage(@PathVariable String guildId) {
+        return guildService.getWelcomeImage(guildId)
+                .map(image -> ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(image.getMimeType()))
+                        .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition(image.getImageName()))
+                        .body(image.getImageData()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private String contentDisposition(String imageName) {
+        if (imageName == null || imageName.isBlank()) {
+            return "inline";
+        }
+
+        return "inline; filename=\"" + imageName.replace("\"", "") + "\"";
     }
 }

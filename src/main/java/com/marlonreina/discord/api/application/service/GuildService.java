@@ -9,6 +9,7 @@ import com.marlonreina.discord.api.domain.model.GuildConfigAggregate;
 import com.marlonreina.discord.api.domain.model.WelcomeConfig;
 import com.marlonreina.discord.api.domain.model.WelcomeConfigUpdate;
 import com.marlonreina.discord.api.domain.model.WelcomeImage;
+import com.marlonreina.discord.api.domain.model.WelcomeImageContent;
 import com.marlonreina.discord.api.domain.model.WelcomeImageUpdate;
 import com.marlonreina.discord.api.domain.port.out.DiscordPort;
 import com.marlonreina.discord.api.domain.port.out.GuildConfigRepositoryPort;
@@ -21,6 +22,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GuildService {
@@ -95,6 +97,11 @@ public class GuildService {
 
         WelcomeImageUpdate update = welcomeImageStorageService.store(guildId, image);
         return guildConfigRepository.saveWelcomeImage(update);
+    }
+
+    public Optional<WelcomeImageContent> getWelcomeImage(String guildId) {
+        return guildConfigRepository.findWelcomeImageContentByGuildId(guildId)
+                .filter(image -> image.getImageData().length > 0);
     }
 
     private DiscordGuild findManageableGuild(String userId, String guildId) {
